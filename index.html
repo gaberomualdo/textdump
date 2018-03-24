@@ -3,24 +3,168 @@
 <head>
 	<title>Textdump</title>
 </head>
+
+<style>
+
+* {
+	margin: 0;
+	padding: 0;
+	font-family: -apple-system,"Segoe UI","Ubuntu",sans-serif;
+}
+div#container {
+	width: 625px;
+	margin-left: calc((100% - 625px) / 2);
+	box-sizing: border-box;
+	padding: 2.5vh 0;
+}
+div#container header {
+	display: block;
+	text-align: center;
+	padding-bottom: 2.5vh;
+}
+div#container header h1 {
+	font-size: 2.5rem;
+	line-height: 1.5;
+}
+div#container header p {
+	font-size: 1.25rem;
+	line-height: 1.5;
+}
+div#container div {
+	margin: 2.5vh 0;
+	display: block;
+	clear: both;
+}
+div#container div input,div#container div textarea,div#container div button {
+	border: none;
+	height: 5vh;
+	line-height: 5vh;
+	font-size: 3.5vh;
+	padding: 0 0.75vh;
+	box-sizing: content-box;
+	display: inline-block;
+	border: 2px solid #ccc;
+	outline: none;
+	margin: 1.25vh;
+	background-color: transparent;
+	align-items: stretch;
+	transition: border-color 0.25s;
+	float: left;
+	display: block;
+	vertical-align: text-bottom;
+}
+div#container div button {
+	cursor: pointer;
+}
+div#container div input:focus,div#container div textarea:focus,div#container div button:hover{
+	border-color: #2133ff;
+}
+div#container div input,div#container div textarea {
+	margin-left: 0;
+}
+div#container div textarea {
+	width: 60%;
+	height: 5vh;
+	resize: none;
+	transition: border-color 0.25s,height 0.5s;
+}
+div#container div textarea:focus {
+	height: 25vh;
+}
+div#container div h1.code {
+	display: block;
+	clear: both;
+	font-size: 1.5rem;
+	line-height: 5vh;
+	font-weight: normal;
+}
+
+div#container div p#sharedText {
+	display: block;
+	clear: both;
+	font-size: 1.25rem;
+	line-height: 5vh;
+	margin-top: 1.5vh;
+}
+</style>
+
 <body>
 	<div id="container">
 		<header>
 			<h1>Textdump</h1>
 			<p>Share text quickly and easily</p>
 		</header>
-		<div class="sendText">
+		<div class="getText">
+			<h1>Get Text</h1>
 			<p>Get shared text using your code.</p>
-			<input type="text" placeholder="Text Code...">
-			<button>Get Text!</button>
-			<p id='text'></p>
+			<input type="text" id='sharedCode' placeholder="Text Code..." spellcheck="false">
+			<button id="sharedBtn">Get Text!</button>
+			<p id='sharedText'></p>
 		</div>
 		<div class="sendText">
+			<h1>Share Text</h1>
 			<p>Share your text using one simple code.<br>Your shared text expires after 24 hours.</p>
-			<textarea placeholder="Dump Your Text Here!"></textarea>
-			<button>Share Text!</button>
-			<h1><strong>Code:</strong><span id='textcode'></span></h1>
+			<textarea spellcheck="false" placeholder="Dump Your Text Here!" id='shareText'></textarea>
+			<button id='shareBtn'>Share Text!</button>
+			<h1 class='code'><strong>Share Code: </strong><span id='shareCode'></span></h1>
 		</div>
 	</div>
 </body>
+
+<script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+<script>
+
+function getDateDiff(d1,d2){
+	var timeDiff = Math.abs(d2.getTime() - d1.getTime());
+	var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+	return (diffDays);
+}
+
+// Initialize Firebase
+var config = {
+	apiKey: "AIzaSyARa4FcVR6dqiTTrX3u4Oaf4tknknh30X4",
+	authDomain: "textdump-cf861.firebaseapp.com",
+	databaseURL: "https://textdump-cf861.firebaseio.com",
+	projectId: "textdump-cf861",
+	storageBucket: "",
+	messagingSenderId: "43365753401"
+};
+firebase.initializeApp(config);
+
+var database = firebase.database();
+
+var allData = {};
+
+database.ref().on('value', function(snapshot) {
+	allData = snapshot.val();
+});
+
+document.getElementById("shareBtn").onclick = function(){
+	var text = document.getElementById("shareText").value;
+	var code;
+	var time = new Date();
+	var status = true;
+	while(status){
+		code = Math.floor(Math.random()*1000000);
+		if(!allData || !allData.hasOwnProperty(code)){
+			status = false;
+		}else{
+			if(getDateDiff(time,JSON.parse(allData[code].time)) > 1){
+				status = false;
+			};
+		}
+	}
+	time = JSON.stringify(time);
+	var dataObject = {time: time,text: text};
+	firebase.database().ref(code).set(dataObject);
+	document.getElementById("shareCode").innerText = code;
+}
+document.getElementById("sharedBtn").onclick = function(){
+	var code = document.getElementById("sharedCode").value;
+	database.ref(code).on('value', function(snapshot) {
+		document.getElementById("sharedText").innerHTML = "<strong>Text: </strong>" + snapshot.val().text;
+	});
+}
+
+</script>
 </html>

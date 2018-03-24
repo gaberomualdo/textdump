@@ -1,2 +1,3 @@
 # textdump
-Dump text in this website for everyone to see - similar to pastebin.
+Share text with others using a secret pin that only you know.
+See at https://xtrp.github.io/textdump

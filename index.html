@@ -105,7 +105,7 @@ div#container div p#sharedText {
 		</div>
 		<div class="sendText">
 			<h1>Share Text</h1>
-			<p>Share your text using one simple code.<br>Your shared text expires after 24 hours.</p>
+			<p>Share your text using one simple code.</p>
 			<textarea spellcheck="false" placeholder="Dump Your Text Here!" id='shareText'></textarea>
 			<button id='shareBtn'>Share Text!</button>
 			<h1 class='code'><strong>Share Code: </strong><span id='shareCode'></span></h1>
@@ -115,12 +115,6 @@ div#container div p#sharedText {
 
 <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
 <script>
-
-function getDateDiff(d1,d2){
-	var timeDiff = Math.abs(d2.getTime() - d1.getTime());
-	var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
-	return (diffDays);
-}
 
 // Initialize Firebase
 var config = {
@@ -144,20 +138,14 @@ database.ref().on('value', function(snapshot) {
 document.getElementById("shareBtn").onclick = function(){
 	var text = document.getElementById("shareText").value;
 	var code;
-	var time = new Date();
 	var status = true;
 	while(status){
-		code = Math.floor(Math.random()*1000000000000000000000);
+		code = Math.floor(Math.random()*10000000);
 		if(!allData || !allData.hasOwnProperty(code)){
 			status = false;
-		}else{
-			if(getDateDiff(time,JSON.parse(allData[code].time)) > 1){
-				status = false;
-			};
 		}
 	}
-	time = JSON.stringify(time);
-	var dataObject = {time: time,text: text};
+	var dataObject = {text: text};
 	firebase.database().ref(code).set(dataObject);
 	document.getElementById("shareCode").innerText = code;
 }

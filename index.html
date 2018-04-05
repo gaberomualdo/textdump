@@ -156,5 +156,16 @@ document.getElementById("sharedBtn").onclick = function(){
 	});
 }
 
+function checkMobile(){
+	if(window.innerWidth <= 625){
+		document.getElementById("container").setAttribute("class","mobile");
+	}else{
+		document.getElementById("container").removeAttribute("class");
+	}
+}
+
+window.onload = checkMobile;
+window.onresize = checkMobile;
+
 </script>
 </html>
